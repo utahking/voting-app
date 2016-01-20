@@ -14,8 +14,12 @@ export function next(state) {
   	.remove('entries')
   	.set('winner', entries.first());
   } else {
+
+    var currentRound = state.getIn(['vote', 'votingRound']);
+    var nextRound = !currentRound ? 1 : currentRound + 1;
+
 	  return state.merge({
-	    vote: Map({pair: entries.take(2)}),
+	    vote: Map({pair: entries.take(2), votingRound: nextRound}),
 	    entries: entries.skip(2)
 	  });
 	}
@@ -32,9 +36,16 @@ function getWinners(vote){
 }
 
 export function vote(state, entry) {
-  return state.updateIn(
-    ['tally', entry],
-    0,
-    tally => tally + 1
-  );
+  const pair = state.get('pair');
+  const entryInPair = pair.includes(entry);
+  if(entryInPair){
+      return state.updateIn(
+        ['tally', entry],
+        0,
+        tally => tally + 1
+      );
+  } else {
+    return state;
+  }
+
 }
